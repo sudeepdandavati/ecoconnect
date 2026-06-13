@@ -44,11 +44,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'up', message: 'EcoConnect API is healthy' });
 });
 
-// Serve frontend static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+// Serve frontend static files in production (only if build exists)
+const fs = require('fs');
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+const indexHtmlPath = path.resolve(frontendDistPath, 'index.html');
+
+if (process.env.NODE_ENV === 'production' && fs.existsSync(indexHtmlPath)) {
+  app.use(express.static(frontendDistPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
+    res.sendFile(indexHtmlPath);
   });
 } else {
   app.get('/', (req, res) => {
